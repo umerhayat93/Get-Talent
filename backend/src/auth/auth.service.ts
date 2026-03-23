@@ -47,7 +47,9 @@ export class AuthService {
     });
     await this.playerRepo.save(player);
     await this.seedTournaments();
-    return { message: 'Registered successfully', playerId: player.id };
+    // Return token so frontend can immediately upload receipt without requiring login first
+    const token = this.jwtService.sign({ sub: user.id, role: user.role, name: user.name }, { secret: JWT_SECRET });
+    return { message: 'Registered successfully', playerId: player.id, token, user: { id: user.id, name: user.name, role: user.role, status: user.status } };
   }
 
   async registerCaptain(dto: any) {
@@ -63,7 +65,8 @@ export class AuthService {
     await this.userRepo.save(user);
     const captain = this.captainRepo.create({ user, name: dto.name.trim(), phone, teamName: dto.teamName.trim(), status: CaptainStatus.PENDING, subscriptionPaid: false, canBid: false });
     await this.captainRepo.save(captain);
-    return { message: 'Registered successfully', captainId: captain.id };
+    const token = this.jwtService.sign({ sub: user.id, role: user.role, name: user.name }, { secret: JWT_SECRET });
+    return { message: 'Registered successfully', captainId: captain.id, token, user: { id: user.id, name: user.name, role: user.role, status: user.status } };
   }
 
   async registerFan(dto: any) {
@@ -89,7 +92,7 @@ export class AuthService {
     const hashed = await bcrypt.hash(String(dto.password), 10);
     const user = this.userRepo.create({
       name: dto.name.trim(), phone, password: hashed,
-      role: UserRole.ORGANISER, status: UserStatus.APPROVED, // auto-approved
+      role: UserRole.ORGANISER, status: UserStatus.APPROVED,
       address: dto.address?.trim() || null,
     });
     await this.userRepo.save(user);
@@ -123,7 +126,6 @@ export class AuthService {
         where: { user: { id: userId } },
         relations: ['user', 'tournament'],
       });
-      // Sync user.status with player.status so frontend always has fresh status
       if (player && player.status && user.status !== (player.status as any)) {
         user.status = player.status as any;
       }
@@ -134,7 +136,6 @@ export class AuthService {
         where: { user: { id: userId } },
         relations: ['user'],
       });
-      // Sync user.status with captain.status
       if (captain && captain.status && user.status !== (captain.status as any)) {
         user.status = captain.status as any;
       }
@@ -154,4 +155,4 @@ export class AuthService {
       }
     } catch {}
   }
-}
+      }
