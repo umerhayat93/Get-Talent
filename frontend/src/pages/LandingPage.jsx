@@ -93,10 +93,10 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {[
-              { path: '/register/player',    label: 'Player',    sub: 'Join auctions',      accent: '#FFFFFF' },
-              { path: '/register/captain',   label: 'Captain',   sub: 'Build your team',    accent: '#FFFFFF' },
-              { path: '/register/fan',       label: 'Fan',       sub: 'Watch for free',     accent: '#FFFFFF' },
-              { path: '/register/organiser', label: 'Organiser', sub: 'Run tournaments',    accent: '#FFFFFF' },
+              { path: '/register/player',    label: 'Player',    sub: 'Join auctions',      accent: '#ffd700' },
+              { path: '/register/captain',   label: 'Captain',   sub: 'Build your team',    accent: '#64b5f6' },
+              { path: '/register/fan',       label: 'Fan',       sub: 'Watch for free',     accent: '#81c784' },
+              { path: '/register/organiser', label: 'Organiser', sub: 'Run tournaments',    accent: '#ffb74d' },
             ].map(({ path, label, sub, accent }) => (
               <button key={path} onClick={() => navigate(path)}
                 style={{
@@ -117,7 +117,7 @@ export default function LandingPage() {
 
         {/* Feature pills */}
         <div style={{ display: 'flex', gap: 7, marginTop: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['Live Auctions', 'Real-time Bidding', 'GET · Hired'].map(f => (
+          {['Live Auctions', 'Real-time Bidding', 'PPL · BPL'].map(f => (
             <span key={f} style={{
               padding: '4px 12px', borderRadius: 9999,
               background: 'rgba(255,255,255,0.1)',

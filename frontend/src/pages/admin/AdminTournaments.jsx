@@ -142,6 +142,9 @@ export default function AdminTournaments() {
                       <button onClick={() => { setActionId(t.id); reject(t.id); }} disabled={actionId === t.id} style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(255,68,68,0.1)', border: '1px solid rgba(255,68,68,0.25)', color: '#ff4444', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
                         ❌ Reject
                       </button>
+                      <button onClick={() => deleteTournament(t.id, t.name)} style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(255,68,68,0.18)', border: '1px solid rgba(255,68,68,0.45)', color: '#ff4444', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+                        🗑
+                      </button>
                     </div>
                   </div>
                 ))}

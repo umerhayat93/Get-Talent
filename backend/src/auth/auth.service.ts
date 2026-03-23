@@ -35,7 +35,7 @@ export class AuthService {
     const existing = await this.userRepo.findOne({ where: { phone } });
     if (existing) throw new ConflictException('Phone already registered — please login');
     const hashed = await bcrypt.hash(String(dto.password), 10);
-    const user = this.userRepo.create({ name: dto.name.trim(), phone, password: hashed, role: UserRole.PLAYER, status: UserStatus.PENDING });
+    const user = this.userRepo.create({ name: dto.name.trim(), phone, email: dto.email?.trim().toLowerCase() || null, password: hashed, role: UserRole.PLAYER, status: UserStatus.PENDING });
     await this.userRepo.save(user);
     let tournament = null;
     if (dto.tournamentId) tournament = await this.tournamentRepo.findOne({ where: { id: dto.tournamentId } });
@@ -61,7 +61,7 @@ export class AuthService {
     const existing = await this.userRepo.findOne({ where: { phone } });
     if (existing) throw new ConflictException('Phone already registered — please login');
     const hashed = await bcrypt.hash(String(dto.password), 10);
-    const user = this.userRepo.create({ name: dto.name.trim(), phone, password: hashed, role: UserRole.CAPTAIN, status: UserStatus.PENDING });
+    const user = this.userRepo.create({ name: dto.name.trim(), phone, email: dto.email?.trim().toLowerCase() || null, password: hashed, role: UserRole.CAPTAIN, status: UserStatus.PENDING });
     await this.userRepo.save(user);
     const captain = this.captainRepo.create({ user, name: dto.name.trim(), phone, teamName: dto.teamName.trim(), status: CaptainStatus.PENDING, subscriptionPaid: false, canBid: false });
     await this.captainRepo.save(captain);
@@ -92,7 +92,7 @@ export class AuthService {
     const hashed = await bcrypt.hash(String(dto.password), 10);
     const user = this.userRepo.create({
       name: dto.name.trim(), phone, password: hashed,
-      role: UserRole.ORGANISER, status: UserStatus.APPROVED,
+      role: UserRole.ORGANISER, status: UserStatus.APPROVED, // auto-approved
       address: dto.address?.trim() || null,
     });
     await this.userRepo.save(user);
@@ -108,6 +108,30 @@ export class AuthService {
     if (user.status === UserStatus.BANNED) throw new UnauthorizedException('Account banned — contact admin');
     const token = this.jwtService.sign({ sub: user.id, role: user.role, name: user.name }, { secret: JWT_SECRET });
     return { token, user: { id: user.id, name: user.name, role: user.role, status: user.status } };
+  }
+
+  async forgotPassword(email: string) {
+    if (!email?.trim()) throw new BadRequestException('Email is required');
+    const user = await this.userRepo.findOne({ where: { email: email.trim().toLowerCase() } });
+    if (!user) throw new BadRequestException('No account found with this email address');
+    // Return phone hint (last 4 digits shown) — no email service needed
+    const hint = user.phone.replace(/.(?=.{4})/g, '*');
+    return {
+      message: 'Account found. You can now reset your password.',
+      phoneHint: hint,
+      email: user.email,
+      verified: true,
+    };
+  }
+
+  async resetPassword(email: string, newPassword: string) {
+    if (!email?.trim())       throw new BadRequestException('Email is required');
+    if (!newPassword || newPassword.length < 6) throw new BadRequestException('Password min 6 characters');
+    const user = await this.userRepo.findOne({ where: { email: email.trim().toLowerCase() } });
+    if (!user) throw new BadRequestException('No account found with this email');
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepo.save(user);
+    return { message: 'Password reset successfully. You can now login.' };
   }
 
   async updateProfilePicture(userId: string, filename: string) {
@@ -126,6 +150,7 @@ export class AuthService {
         where: { user: { id: userId } },
         relations: ['user', 'tournament'],
       });
+      // Sync user.status with player.status so frontend always has fresh status
       if (player && player.status && user.status !== (player.status as any)) {
         user.status = player.status as any;
       }
@@ -136,6 +161,7 @@ export class AuthService {
         where: { user: { id: userId } },
         relations: ['user'],
       });
+      // Sync user.status with captain.status
       if (captain && captain.status && user.status !== (captain.status as any)) {
         user.status = captain.status as any;
       }
@@ -155,4 +181,4 @@ export class AuthService {
       }
     } catch {}
   }
-      }
+}

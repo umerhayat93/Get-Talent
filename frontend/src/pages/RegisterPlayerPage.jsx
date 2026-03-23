@@ -21,10 +21,10 @@ const SKILLS = [
 export default function RegisterPlayerPage() {
   const navigate  = useNavigate();
   const setAuth   = useAuthStore(s => s.setAuth);
-  const [step, setStep] = useState('form');
+  const [step, setStep] = useState('form'); // 'form' | 'success'
   const [loading, setLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', password: '', confirm: '', skill: 'Batter', category: 'Gold' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', password: '', confirm: '', skill: 'Batter', category: 'Gold' });
   const [errs, setErrs] = useState({});
 
   const cat = CATS.find(c => c.name === form.category) || CATS[1];
@@ -55,6 +55,7 @@ export default function RegisterPlayerPage() {
         password: form.password,
         skill: form.skill,
         category: form.category,
+        email: form.email.trim() || undefined,
       });
       // Auto-login with returned token so receipt upload works immediately
       if (data.token && data.user) {
@@ -92,7 +93,7 @@ export default function RegisterPlayerPage() {
     </div>
   );
 
-  const inp = { width: '100%', padding: '12px 16px', background: '#f0f2f5', border: '1.5px solid #e4e6ea', borderRadius: 12, color: '#050505', fontSize: 15, outline: 'none', fontFamily: 'Outfit, sans-serif', boxSizing: 'border-box' };
+  const inp = { width: '100%', padding: '12px 16px', background: '#f0ebe0', border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#050505', fontSize: 15, outline: 'none', fontFamily: 'Outfit, sans-serif', boxSizing: 'border-box' };
   const lbl = { display: 'block', fontSize: 11, fontWeight: 700, color: '#65676b', letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 6 };
 
   return (
@@ -103,38 +104,50 @@ export default function RegisterPlayerPage() {
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
-        <div style={{ background: '#ffffff', border: '1px solid #e4e6ea', borderRadius: 20, padding: '22px 18px', marginBottom: 14 }}>
+        <div style={{ background: '#ffffff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '22px 18px', marginBottom: 14 }}>
 
+          {/* Name */}
           <div style={{ marginBottom: 14 }}>
             <label style={lbl}>Full Name</label>
-            <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} placeholder="Your full name" style={{ ...inp, borderColor: errs.name ? '#ff4444' : '#e4e6ea' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.name ? '#ff4444' : '#e4e6ea'} />
+            <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} placeholder="Your full name" style={{ ...inp, borderColor: errs.name ? '#ff4444' : 'rgba(0,0,0,0.08)' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.name ? '#ff4444' : 'rgba(0,0,0,0.08)'} />
             {errs.name && <p style={{ fontSize: 12, color: '#ff6666', marginTop: 4 }}>{errs.name}</p>}
           </div>
 
+          {/* Phone */}
           <div style={{ marginBottom: 14 }}>
             <label style={lbl}>Phone Number (Login ID)</label>
-            <input type="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} placeholder="03xxxxxxxxx" style={{ ...inp, borderColor: errs.phone ? '#ff4444' : '#e4e6ea' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.phone ? '#ff4444' : '#e4e6ea'} />
+            <input type="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} placeholder="03xxxxxxxxx" style={{ ...inp, borderColor: errs.phone ? '#ff4444' : 'rgba(0,0,0,0.08)' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.phone ? '#ff4444' : 'rgba(0,0,0,0.08)'} />
             {errs.phone && <p style={{ fontSize: 12, color: '#ff6666', marginTop: 4 }}>{errs.phone}</p>}
           </div>
 
+          {/* Gmail */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={lbl}>Gmail Address (for password reset)</label>
+            <input type="email" value={form.email} onChange={e => setField('email', e.target.value)} placeholder="yourname@gmail.com" style={inp} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = '#e4e6ea'} />
+            <p style={{ fontSize:11, color:'#8a8d91', marginTop:3 }}>Optional — only used if you forget your password</p>
+          </div>
+
+          {/* Password */}
           <div style={{ marginBottom: 14 }}>
             <label style={lbl}>Password (min 6 chars)</label>
-            <input type="password" value={form.password} onChange={e => setField('password', e.target.value)} placeholder="Choose a password" style={{ ...inp, borderColor: errs.password ? '#ff4444' : '#e4e6ea' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.password ? '#ff4444' : '#e4e6ea'} />
+            <input type="password" value={form.password} onChange={e => setField('password', e.target.value)} placeholder="Choose a password" style={{ ...inp, borderColor: errs.password ? '#ff4444' : 'rgba(0,0,0,0.08)' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.password ? '#ff4444' : 'rgba(0,0,0,0.08)'} />
             {errs.password && <p style={{ fontSize: 12, color: '#ff6666', marginTop: 4 }}>{errs.password}</p>}
           </div>
 
+          {/* Confirm */}
           <div style={{ marginBottom: 18 }}>
             <label style={lbl}>Confirm Password</label>
-            <input type="password" value={form.confirm} onChange={e => setField('confirm', e.target.value)} placeholder="Repeat password" style={{ ...inp, borderColor: errs.confirm ? '#ff4444' : '#e4e6ea' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.confirm ? '#ff4444' : '#e4e6ea'} />
+            <input type="password" value={form.confirm} onChange={e => setField('confirm', e.target.value)} placeholder="Repeat password" style={{ ...inp, borderColor: errs.confirm ? '#ff4444' : 'rgba(0,0,0,0.08)' }} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = errs.confirm ? '#ff4444' : 'rgba(0,0,0,0.08)'} />
             {errs.confirm && <p style={{ fontSize: 12, color: '#ff6666', marginTop: 4 }}>{errs.confirm}</p>}
           </div>
 
+          {/* Skill */}
           <div style={{ marginBottom: 18 }}>
             <label style={lbl}>Playing Role</label>
             <div style={{ display: 'flex', gap: 8 }}>
               {SKILLS.map(s => (
                 <button key={s.value} type="button" onClick={() => setField('skill', s.value)}
-                  style={{ flex: 1, padding: '10px 6px', borderRadius: 12, cursor: 'pointer', border: `2px solid ${form.skill === s.value ? '#1877f2' : '#e4e6ea'}`, background: form.skill === s.value ? '#e7f3ff' : 'transparent', color: form.skill === s.value ? '#1877f2' : '#65676b', textAlign: 'center', transition: 'all 0.15s' }}>
+                  style={{ flex: 1, padding: '10px 6px', borderRadius: 12, cursor: 'pointer', border: `2px solid ${form.skill === s.value ? '#1877f2' : 'rgba(0,0,0,0.07)'}`, background: form.skill === s.value ? 'rgba(245,200,66,0.1)' : 'transparent', color: form.skill === s.value ? '#1877f2' : '#6a7080', textAlign: 'center', transition: 'all 0.15s' }}>
                   <div style={{ fontSize: 18, marginBottom: 2 }}>{s.icon}</div>
                   <div style={{ fontSize: 11, fontWeight: 700 }}>{s.value}</div>
                 </button>
@@ -142,29 +155,31 @@ export default function RegisterPlayerPage() {
             </div>
           </div>
 
+          {/* Category */}
           <div>
             <label style={lbl}>Category</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {CATS.map(c => (
                 <div key={c.name} onClick={() => setField('category', c.name)}
-                  style={{ padding: '12px 10px', borderRadius: 14, cursor: 'pointer', textAlign: 'center', border: `2px solid ${form.category === c.name ? c.color : '#e4e6ea'}`, background: form.category === c.name ? `${c.color}15` : 'transparent', transition: 'all 0.15s' }}>
+                  style={{ padding: '12px 10px', borderRadius: 14, cursor: 'pointer', textAlign: 'center', border: `2px solid ${form.category === c.name ? c.color : 'rgba(0,0,0,0.07)'}`, background: form.category === c.name ? `${c.color}15` : 'transparent', transition: 'all 0.15s' }}>
                   <div style={{ fontSize: 20, marginBottom: 4 }}>{c.icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: form.category === c.name ? c.color : '#050505', marginBottom: 3 }}>{c.name}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: form.category === c.name ? c.color : '#1a1a2e', marginBottom: 3 }}>{c.name}</div>
                   <div style={{ fontSize: 11, color: '#8a8d91' }}>Rs. {c.fee.toLocaleString()}</div>
-                  <div style={{ fontSize: 11, color: '#42b72a' }}>Bid: Rs. {c.minBid.toLocaleString()}</div>
+                  <div style={{ fontSize: 11, color: '#00e676' }}>Bid: Rs. {c.minBid.toLocaleString()}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div style={{ background: '#e7f3ff', border: '1px solid #c3d9fd', borderRadius: 14, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+        {/* Fee summary */}
+        <div style={{ background: 'rgba(245,200,66,0.07)', border: '1px solid rgba(245,200,66,0.15)', borderRadius: 14, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
           <div><div style={{ fontSize: 11, color: '#65676b', fontWeight: 600, marginBottom: 2 }}>Registration Fee</div><div style={{ fontSize: 20, fontWeight: 800, color: '#1877f2' }}>Rs. {cat.fee.toLocaleString()}</div></div>
-          <div style={{ textAlign: 'right' }}><div style={{ fontSize: 11, color: '#65676b', fontWeight: 600, marginBottom: 2 }}>Minimum Bid</div><div style={{ fontSize: 20, fontWeight: 800, color: '#42b72a' }}>Rs. {cat.minBid.toLocaleString()}</div></div>
+          <div style={{ textAlign: 'right' }}><div style={{ fontSize: 11, color: '#65676b', fontWeight: 600, marginBottom: 2 }}>Minimum Bid</div><div style={{ fontSize: 20, fontWeight: 800, color: '#00e676' }}>Rs. {cat.minBid.toLocaleString()}</div></div>
         </div>
 
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: 14, background: loading ? '#e4e6ea' : '#1877f2', border: 'none', color: loading ? '#9090a8' : '#ffffff', fontSize: 16, fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: 'Outfit,sans-serif' }}>
-          {loading ? <><div style={{ width: 18, height: 18, border: '2.5px solid rgba(255,255,255,0.2)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />Registering...</> : 'Register as Player'}
+        <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', borderRadius: 14, background: loading ? '#e4e6ea' : 'linear-gradient(135deg,#f5c842,#e6a800)', border: 'none', color: loading ? '#9090a8' : '#ffffff', fontSize: 16, fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          {loading ? <><div style={{ width: 18, height: 18, border: '2.5px solid rgba(255,255,255,0.2)', borderTopColor: '#888', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />Registering...</> : 'Register as Player'}
         </button>
 
         <p style={{ textAlign: 'center', color: '#8a8d91', fontSize: 13, marginTop: 14 }}>

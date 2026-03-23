@@ -14,7 +14,8 @@ export class PlayersController {
     @Query('category') category?: string,
     @Query('skill') skill?: string,
     @Query('tournamentId') tournamentId?: string,
-  ) { return this.svc.getFeed(+page, +limit, category, skill, tournamentId); }
+    @Query('status') status?: string,
+  ) { return this.svc.getFeed(+page, +limit, category, skill, tournamentId, status); }
 
   @Get('by-tournament/:tournamentId')
   getByTournament(@Param('tournamentId') tid: string) { return this.svc.getByTournament(tid); }

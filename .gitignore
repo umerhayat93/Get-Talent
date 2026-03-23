@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.db
+uploads/*
+!uploads/.gitkeep
+.DS_Store
+*.log
+# Note: .env.production is intentionally NOT excluded so Render gets VITE_API_URL

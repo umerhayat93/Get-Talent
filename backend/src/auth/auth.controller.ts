@@ -30,6 +30,12 @@ export class AuthController {
   getProfile(@Request() req: any) { return this.authService.getProfile(req.user.sub); }
 
   // Universal profile picture — all roles (fan, organiser)
+  @Post('forgot-password')
+  forgotPassword(@Body() body: { email: string }) { return this.authService.forgotPassword(body.email); }
+
+  @Post('reset-password')
+  resetPassword(@Body() body: { email: string; newPassword: string }) { return this.authService.resetPassword(body.email, body.newPassword); }
+
   @Post('profile-picture')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))

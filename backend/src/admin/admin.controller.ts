@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../auth/jwt-auth.guard';
 
@@ -30,6 +30,19 @@ export class AdminController {
   @Patch('tournaments/:id/approve')   approveTournament(@Param('id') id: string, @Body() b: any) { return this.svc.approveTournament(id, b.biddingSchedule, b.remarks); }
   @Patch('tournaments/:id/reject')    rejectTournament (@Param('id') id: string, @Body() b: any) { return this.svc.rejectTournament(id, b.remarks); }
   @Patch('tournaments/:id/schedule')  setSchedule      (@Param('id') id: string, @Body() b: any) { return this.svc.setBiddingSchedule(id, b.schedule); }
+
+  // Delete player
+  @Delete('players/:id') deletePlayer(@Param('id') id: string) { return this.svc.deletePlayer(id); }
+  // Edit player
+  @Patch('players/:id/edit') editPlayer(@Param('id') id: string, @Body() b: any) { return this.svc.editPlayer(id, b); }
+
+  // Delete captain
+  @Delete('captains/:id') deleteCaptain(@Param('id') id: string) { return this.svc.deleteCaptain(id); }
+
+  // Delete tournament
+  @Delete('tournaments/:id') deleteTournament(@Param('id') id: string) { return this.svc.deleteTournament(id); }
+  // Edit tournament
+  @Patch('tournaments/:id/edit') editTournament(@Param('id') id: string, @Body() b: any) { return this.svc.editTournament(id, b); }
 
   // Category bidding
   @Post('bidding/start-category')

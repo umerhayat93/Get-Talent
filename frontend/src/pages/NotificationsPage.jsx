@@ -3,52 +3,7 @@ import api from '../utils/api';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 
-/* ✅ ICONS */
-
-const CheckIcon = () => (
-  <svg width="24" height="24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M7 12l3 3 6-6"/>
-  </svg>
-);
-
-const RejectIcon = () => (
-  <svg width="24" height="24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M8 8l8 8M16 8l-8 8"/>
-  </svg>
-);
-
-const WaitingIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 50 50">
-    <circle cx="25" cy="25" r="20" stroke="#f59e0b" strokeWidth="4" fill="none" strokeLinecap="round"
-      strokeDasharray="90 150">
-      <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/>
-    </circle>
-  </svg>
-);
-
-const BroadcastIcon = () => (
-  <svg width="24" height="24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 11v2"/>
-    <path d="M8 9v6"/>
-    <path d="M12 6v12"/>
-    <path d="M16 9v6"/>
-    <path d="M20 11v2"/>
-  </svg>
-);
-
-/* ✅ ICON MAP */
-
-const TYPE_ICONS = {
-  approval: <CheckIcon />,
-  rejection: <RejectIcon />,
-  bidding: <WaitingIcon />,
-  sold: '🏆',
-  won: '🏆',
-  broadcast: <BroadcastIcon />,
-  general: '🔔'
-};
+const TYPE_ICONS = { approval:'✅', rejection:'❌', bidding:'⚡', sold:'🏆', won:'🏆', broadcast:'📢', general:'🔔' };
 
 export default function NotificationsPage() {
   const [notifs, setNotifs] = useState([]);
@@ -60,11 +15,8 @@ export default function NotificationsPage() {
     try {
       const { data } = await api.get('/notifications/mine');
       setNotifs(data);
-    } catch {
-      toast.error('Failed to load notifications');
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Failed to load notifications'); }
+    finally { setLoading(false); }
   };
 
   const markAllRead = async () => {
@@ -94,30 +46,11 @@ export default function NotificationsPage() {
     <div className="page">
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
         <div>
-          <h1 style={{ fontFamily:"'Bebas Neue',cursive", fontSize:28, letterSpacing:1, lineHeight:1 }}>
-            Notifications
-          </h1>
-          {unread > 0 && (
-            <span style={{ fontSize:13, color:'#1877f2' }}>
-              {unread} unread
-            </span>
-          )}
+          <h1 style={{ fontFamily:"'Bebas Neue',cursive", fontSize:28, letterSpacing:1, lineHeight:1 }}>Notifications</h1>
+          {unread > 0 && <span style={{ fontSize:13, color:'#1877f2' }}>{unread} unread</span>}
         </div>
-
         {unread > 0 && (
-          <button
-            onClick={markAllRead}
-            style={{
-              padding:'7px 14px',
-              borderRadius:10,
-              background:'rgba(245,200,66,0.1)',
-              border:'1px solid rgba(245,200,66,0.25)',
-              color:'#1877f2',
-              fontSize:12,
-              fontWeight:600,
-              cursor:'pointer'
-            }}
-          >
+          <button onClick={markAllRead} style={{ padding:'7px 14px', borderRadius:10, background:'rgba(245,200,66,0.1)', border:'1px solid rgba(245,200,66,0.25)', color:'#1877f2', fontSize:12, fontWeight:600, cursor:'pointer' }}>
             Mark all read
           </button>
         )}
@@ -132,71 +65,26 @@ export default function NotificationsPage() {
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
           {notifs.map(n => (
-            <div
-              key={n.id}
-              onClick={()=>!n.isRead && markRead(n.id)}
-              style={{
-                background: n.isRead ? 'rgba(255,255,255,0.02)' : '#ffffff',
-                border: `1px solid ${n.isRead ? 'rgba(0,0,0,0.06)' : 'rgba(245,200,66,0.15)'}`,
-                borderRadius:14,
-                padding:'14px 16px',
-                cursor:'pointer',
-                transition:'all 0.2s',
-                display:'flex',
-                gap:12,
-                alignItems:'flex-start',
-              }}
-            >
-
-              {/* ✅ ICON */}
-              <div style={{ flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                {TYPE_ICONS[n.type] || '🔔'}
-              </div>
-
-              {/* ✅ CONTENT */}
+            <div key={n.id} onClick={()=>!n.isRead&&markRead(n.id)} style={{
+              background: n.isRead ? 'rgba(255,255,255,0.02)' : '#ffffff',
+              border: `1px solid ${n.isRead ? 'rgba(0,0,0,0.06)' : 'rgba(245,200,66,0.15)'}`,
+              borderRadius:14, padding:'14px 16px', cursor:'pointer',
+              transition:'all 0.2s', display:'flex', gap:12, alignItems:'flex-start',
+            }}>
+              <div style={{ fontSize:24, flexShrink:0 }}>{TYPE_ICONS[n.type] || '🔔'}</div>
               <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontWeight: n.isRead ? 600 : 800, fontSize:15, marginBottom:3 }}>
-                  {n.title}
-                </div>
-
-                <div style={{ fontSize:13, color:'#6a7080', lineHeight:1.5 }}>
-                  {n.message}
-                </div>
-
+                <div style={{ fontWeight: n.isRead?600:800, fontSize:15, marginBottom:3 }}>{n.title}</div>
+                <div style={{ fontSize:13, color:'#6a7080', lineHeight:1.5 }}>{n.message}</div>
                 <div style={{ fontSize:11, color:'#9090a8', marginTop:6 }}>
                   {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
-
-                  {n.isBroadcast && (
-                    <span style={{
-                      marginLeft:8,
-                      background:'rgba(64,169,255,0.15)',
-                      color:'#40a9ff',
-                      padding:'1px 6px',
-                      borderRadius:4,
-                      fontSize:10
-                    }}>
-                      BROADCAST
-                    </span>
-                  )}
+                  {n.isBroadcast && <span style={{ marginLeft:8, background:'rgba(64,169,255,0.15)', color:'#40a9ff', padding:'1px 6px', borderRadius:4, fontSize:10 }}>BROADCAST</span>}
                 </div>
               </div>
-
-              {/* ✅ UNREAD DOT */}
-              {!n.isRead && (
-                <div style={{
-                  width:8,
-                  height:8,
-                  borderRadius:'50%',
-                  background:'#1877f2',
-                  marginTop:4,
-                  flexShrink:0
-                }} />
-              )}
-
+              {!n.isRead && <div style={{ width:8, height:8, borderRadius:'50%', background:'#1877f2', marginTop:4, flexShrink:0 }} />}
             </div>
           ))}
         </div>
       )}
     </div>
   );
-  }
+}

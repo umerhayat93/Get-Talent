@@ -24,17 +24,21 @@ export class PlayersService {
     category?: string,
     skill?:    string,
     tournamentId?: string,
+    status?: string,
   ) {
-    // Use simple find() — avoids ALL QueryBuilder conflicts with eager relations.
-    // TypeORM eager relations (user, tournament) load automatically without joins.
-    const where: any = {
-      status: In([
+    const where: any = {};
+
+    // If specific status requested, filter by it; otherwise show all visible statuses
+    if (status) {
+      where.status = status as any;
+    } else {
+      where.status = In([
         PlayerStatus.PENDING,
         PlayerStatus.APPROVED,
         PlayerStatus.SOLD,
         PlayerStatus.UNSOLD,
-      ]),
-    };
+      ]);
+    }
 
     if (category) where.category = category;
     if (skill)    where.skill    = skill;
@@ -139,6 +143,9 @@ export class PlayersService {
     if (!player) throw new NotFoundException('Player profile not found');
     if (player.status !== PlayerStatus.APPROVED)
       throw new BadRequestException('Your profile must be approved before joining a tournament');
+    // Sold players cannot rejoin a tournament — must re-register after auction ends
+    if (player.soldToTeam)
+      throw new BadRequestException('Sold players cannot rejoin a tournament. Please re-register after your auction ends.');
 
     const tournament = await this.tournamentRepo.findOne({ where: { id: tournamentId } });
     if (!tournament) throw new NotFoundException('Tournament not found');

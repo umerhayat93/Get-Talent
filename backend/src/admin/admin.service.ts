@@ -398,6 +398,54 @@ export class AdminService {
     return this.sessionRepo.find({ order: { createdAt: 'DESC' } });
   }
 
+  async deletePlayer(id: string) {
+    const p = await this.playerRepo.findOne({ where: { id }, relations: ['user'] });
+    if (!p) throw new NotFoundException();
+    // Delete user account too
+    if (p.user?.id) await this.userRepo.delete(p.user.id);
+    await this.playerRepo.delete(id);
+    return { message: 'Player deleted' };
+  }
+
+  async editPlayer(id: string, dto: any) {
+    const p = await this.playerRepo.findOne({ where: { id } });
+    if (!p) throw new NotFoundException();
+    if (dto.name)        p.name        = dto.name;
+    if (dto.category)    p.category    = dto.category;
+    if (dto.skill)       p.skill       = dto.skill;
+    if (dto.minimumBid)  p.minimumBid  = Number(dto.minimumBid);
+    if (dto.status)      p.status      = dto.status;
+    if (dto.remarks !== undefined) p.remarks = dto.remarks;
+    return this.playerRepo.save(p);
+  }
+
+  async deleteCaptain(id: string) {
+    const c = await this.captainRepo.findOne({ where: { id }, relations: ['user'] });
+    if (!c) throw new NotFoundException();
+    if (c.user?.id) await this.userRepo.delete(c.user.id);
+    await this.captainRepo.delete(id);
+    return { message: 'Captain deleted' };
+  }
+
+  async deleteTournament(id: string) {
+    const t = await this.tournamentRepo.findOne({ where: { id } });
+    if (!t) throw new NotFoundException();
+    await this.tournamentRepo.delete(id);
+    return { message: 'Tournament deleted' };
+  }
+
+  async editTournament(id: string, dto: any) {
+    const t = await this.tournamentRepo.findOne({ where: { id } });
+    if (!t) throw new NotFoundException();
+    if (dto.name)        t.name        = dto.name;
+    if (dto.location)    t.location    = dto.location;
+    if (dto.description) t.description = dto.description;
+    if (dto.startDate)   t.startDate   = dto.startDate;
+    if (dto.endDate)     t.endDate     = dto.endDate;
+    if (dto.prizePool)   t.prizePool   = dto.prizePool;
+    return this.tournamentRepo.save(t);
+  }
+
   async broadcast(title: string, message: string, type?: string) {
     return this.notifSvc.broadcast(title, message, type);
   }

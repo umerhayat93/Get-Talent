@@ -29,7 +29,8 @@ export default function AdminCaptains() {
 
   const action = async (id, endpoint, msg) => {
     try {
-      await api.patch(`/admin/captains/${id}/${endpoint}`, { remarks: remarksM[id] || '' });
+      if (endpoint === 'delete') { await api.delete(`/admin/captains/${id}`); }
+      else await api.patch(`/admin/captains/${id}/${endpoint}`, { remarks: remarksM[id] || '' });
       toast.success(msg); load();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   };
@@ -44,6 +45,7 @@ export default function AdminCaptains() {
   return (
     <>
       <AdminLayout title="Captains Management">
+        {/* Tabs */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:20 }}>
           {STATUS_TABS.map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ padding:'6px 14px', borderRadius:9999, fontSize:12, fontWeight:700, cursor:'pointer', border:'none', background: tab===t?'rgba(245,200,66,0.2)':'rgba(0,0,0,0.06)', color: tab===t?'#f5c842':'#8899aa', textTransform:'capitalize' }}>{t}</button>
@@ -60,6 +62,7 @@ export default function AdminCaptains() {
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {captains.map(c => (
               <div key={c.id} style={{ background:'#1a2a3a', border:'1px solid rgba(0,0,0,0.07)', borderRadius:16, overflow:'hidden' }}>
+                {/* Header */}
                 <div style={{ display:'flex', gap:12, alignItems:'center', padding:'14px 16px', cursor:'pointer' }} onClick={() => setExpandedId(expandedId===c.id ? null : c.id)}>
                   <Avatar src={c.user?.profilePicture} name={c.name} size={44} radius={10} />
                   <div style={{ flex:1, minWidth:0 }}>
@@ -68,11 +71,14 @@ export default function AdminCaptains() {
                   </div>
                   <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
                     <span style={{ fontSize:11, fontWeight:700, color: STATUS_COLORS[c.status]||'#8899aa', background:`${STATUS_COLORS[c.status]||'#8899aa'}22`, padding:'2px 8px', borderRadius:9999, textTransform:'capitalize' }}>{c.status}</span>
-                    <span style={{ fontSize:11, color: c.canBid?'#00e676':'#ff9500' }}>{c.canBid ? '⚡ Can Bid' : '🚫 No Bid'}</span>
+                    <span style={{ fontSize:11, color: c.canBid?'#00e676':'#ff9500' }}>
+                      {c.canBid ? '⚡ Can Bid' : '🚫 No Bid'}
+                    </span>
                   </div>
                   <span style={{ color:'#4a5a6a', fontSize:18 }}>{expandedId===c.id ? '▲' : '▼'}</span>
                 </div>
 
+                {/* Expanded */}
                 {expandedId===c.id && (
                   <div className="fade-in" style={{ padding:'0 16px 16px', borderTop:'1px solid rgba(0,0,0,0.06)' }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, margin:'12px 0' }}>
@@ -89,6 +95,7 @@ export default function AdminCaptains() {
                       ))}
                     </div>
 
+                    {/* Receipt — inline modal viewer */}
                     {c.paymentReceipt && (
                       <button
                         onClick={() => setReceiptModal(c.paymentReceipt)}
@@ -99,17 +106,27 @@ export default function AdminCaptains() {
                     )}
 
                     <div style={{ marginBottom:10 }}>
-                      <input value={remarksM[c.id]||''} onChange={e => setRemarksM({...remarksM,[c.id]:e.target.value})} placeholder="Add remarks (optional)" style={{ fontSize:13 }} />
+                      <input
+                        value={remarksM[c.id]||''}
+                        onChange={e => setRemarksM({...remarksM,[c.id]:e.target.value})}
+                        placeholder="Add remarks (optional)"
+                        style={{ fontSize:13 }}
+                      />
                     </div>
 
-                    {c.remarks && <div style={{ background:'rgba(255,149,0,0.1)', borderRadius:8, padding:'8px 10px', marginBottom:10, fontSize:12, color:'#ff9500' }}>Prev remark: {c.remarks}</div>}
+                    {c.remarks && (
+                      <div style={{ background:'rgba(255,149,0,0.1)', borderRadius:8, padding:'8px 10px', marginBottom:10, fontSize:12, color:'#ff9500' }}>
+                        Prev remark: {c.remarks}
+                      </div>
+                    )}
 
                     <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-                      {c.status !== 'approved'  && <button onClick={() => action(c.id,'approve','Captain approved!')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(0,230,118,0.15)', border:'1px solid rgba(0,230,118,0.3)', color:'#00e676', fontWeight:600, cursor:'pointer', fontSize:13 }}>✅ Approve</button>}
+                      <button onClick={() => { if(window.confirm('Delete this captain permanently?')) action(c.id,'delete','Captain deleted'); }} style={{ padding:'8px 14px', borderRadius:10, background:'rgba(255,68,68,0.2)', border:'1px solid rgba(255,68,68,0.5)', color:'#ff4444', fontWeight:700, cursor:'pointer', fontSize:13 }}>🗑 Delete</button>
+                      {c.status !== 'approved' && <button onClick={() => action(c.id,'approve','Captain approved!')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(0,230,118,0.15)', border:'1px solid rgba(0,230,118,0.3)', color:'#00e676', fontWeight:600, cursor:'pointer', fontSize:13 }}>✅ Approve</button>}
                       {!c.canBid && c.status==='approved' && <button onClick={() => action(c.id,'approve-bidding','Bidding enabled!')} style={{ padding:'8px 14px', borderRadius:10, background:'rgba(245,200,66,0.15)', border:'1px solid rgba(245,200,66,0.3)', color:'#f5c842', fontWeight:600, cursor:'pointer', fontSize:13 }}>⚡ Enable Bidding</button>}
-                      {c.status !== 'rejected'  && <button onClick={() => action(c.id,'reject','Captain rejected')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(255,68,68,0.1)', border:'1px solid rgba(255,68,68,0.25)', color:'#ff4444', fontWeight:600, cursor:'pointer', fontSize:13 }}>❌ Reject</button>}
-                      {c.status !== 'banned'    && <button onClick={() => action(c.id,'ban','Captain banned')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(255,68,68,0.15)', border:'1px solid rgba(255,68,68,0.4)', color:'#ff4444', fontWeight:700, cursor:'pointer', fontSize:13 }}>🚫 Ban</button>}
-                      {!c.isMismanaged          && <button onClick={() => action(c.id,'mismanaged','Marked mismanaged')} style={{ padding:'8px 14px', borderRadius:10, background:'rgba(255,68,68,0.1)', border:'1px solid rgba(255,68,68,0.2)', color:'#ff6666', fontWeight:600, cursor:'pointer', fontSize:12 }}>⚠ Mismanaged</button>}
+                      {c.status !== 'rejected' && <button onClick={() => action(c.id,'reject','Captain rejected')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(255,68,68,0.1)', border:'1px solid rgba(255,68,68,0.25)', color:'#ff4444', fontWeight:600, cursor:'pointer', fontSize:13 }}>❌ Reject</button>}
+                      {c.status !== 'banned'   && <button onClick={() => action(c.id,'ban','Captain banned')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(255,68,68,0.15)', border:'1px solid rgba(255,68,68,0.4)', color:'#ff4444', fontWeight:700, cursor:'pointer', fontSize:13 }}>🚫 Ban</button>}
+                      {!c.isMismanaged         && <button onClick={() => action(c.id,'mismanaged','Marked mismanaged')} style={{ padding:'8px 14px', borderRadius:10, background:'rgba(255,68,68,0.1)', border:'1px solid rgba(255,68,68,0.2)', color:'#ff6666', fontWeight:600, cursor:'pointer', fontSize:12 }}>⚠ Mismanaged</button>}
                     </div>
                   </div>
                 )}
@@ -119,15 +136,28 @@ export default function AdminCaptains() {
         )}
       </AdminLayout>
 
+      {/* Receipt Image Modal */}
       {receiptModal && (
-        <div onClick={() => setReceiptModal(null)} style={{ position:'fixed', inset:0, zIndex:2000, background:'rgba(0,0,0,0.93)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:20 }}>
+        <div
+          onClick={() => setReceiptModal(null)}
+          style={{ position:'fixed', inset:0, zIndex:2000, background:'rgba(0,0,0,0.93)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:20 }}
+        >
           <div style={{ position:'relative', maxWidth:'92vw', maxHeight:'86vh' }}>
-            <img src={receiptSrc(receiptModal)} alt="Payment Receipt" style={{ maxWidth:'100%', maxHeight:'80vh', borderRadius:12, boxShadow:'0 8px 40px rgba(0,0,0,0.6)', display:'block', objectFit:'contain' }} onClick={e => e.stopPropagation()} onError={e => { e.target.style.display='none'; }} />
-            <button onClick={() => setReceiptModal(null)} style={{ position:'absolute', top:-14, right:-14, width:32, height:32, borderRadius:'50%', background:'#ff4444', border:'2px solid #fff', color:'#fff', fontSize:14, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}>✕</button>
+            <img
+              src={receiptSrc(receiptModal)}
+              alt="Payment Receipt"
+              style={{ maxWidth:'100%', maxHeight:'80vh', borderRadius:12, boxShadow:'0 8px 40px rgba(0,0,0,0.6)', display:'block', objectFit:'contain' }}
+              onClick={e => e.stopPropagation()}
+              onError={e => { e.target.style.display='none'; }}
+            />
+            <button
+              onClick={() => setReceiptModal(null)}
+              style={{ position:'absolute', top:-14, right:-14, width:32, height:32, borderRadius:'50%', background:'#ff4444', border:'2px solid #fff', color:'#fff', fontSize:14, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}
+            >✕</button>
           </div>
           <p style={{ color:'rgba(255,255,255,0.45)', fontSize:12, marginTop:14 }}>Tap outside to close</p>
         </div>
       )}
     </>
   );
-          }
+}

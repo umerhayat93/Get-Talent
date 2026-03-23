@@ -13,7 +13,7 @@ export default function AdminPlayers() {
   const [loading,     setLoading]     = useState(true);
   const [remarksMap,  setRemarksMap]  = useState({});
   const [expandedId,  setExpandedId]  = useState(null);
-  const [receiptModal,setReceiptModal]= useState(null);
+  const [receiptModal,setReceiptModal]= useState(null); // base64 or url
 
   useEffect(() => { load(); }, [tab]);
 
@@ -29,7 +29,8 @@ export default function AdminPlayers() {
 
   const action = async (id, endpoint, successMsg) => {
     try {
-      await api.patch(`/admin/players/${id}/${endpoint}`, { remarks: remarksMap[id] || '' });
+      if (endpoint === 'delete') { await api.delete(`/admin/players/${id}`); }
+      else await api.patch(`/admin/players/${id}/${endpoint}`, { remarks: remarksMap[id] || '' });
       toast.success(successMsg);
       load();
     } catch (err) { toast.error(err.response?.data?.message || 'Action failed'); }
@@ -37,7 +38,7 @@ export default function AdminPlayers() {
 
   const receiptSrc = (val) => {
     if (!val) return null;
-    if (val.startsWith('data:')) return val;
+    if (val.startsWith('data:')) return val; // base64 data URL
     const base = (import.meta.env.VITE_API_URL || 'https://get-talent-api.onrender.com/api').replace('/api', '');
     return `${base}/uploads/${val}`;
   };
@@ -45,6 +46,7 @@ export default function AdminPlayers() {
   return (
     <>
       <AdminLayout title="Players Management">
+        {/* Tabs */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:20 }}>
           {STATUS_TABS.map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ padding:'6px 14px', borderRadius:9999, fontSize:12, fontWeight:700, cursor:'pointer', border:'none', background: tab===t?'rgba(245,200,66,0.2)':'rgba(0,0,0,0.06)', color: tab===t?'#f5c842':'#8899aa', textTransform:'capitalize' }}>{t}</button>
@@ -61,6 +63,7 @@ export default function AdminPlayers() {
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {players.map(p => (
               <div key={p.id} style={{ background:'#1a2a3a', border:'1px solid rgba(0,0,0,0.07)', borderRadius:16, overflow:'hidden' }}>
+                {/* Header row */}
                 <div style={{ display:'flex', gap:12, alignItems:'center', padding:'14px 16px', cursor:'pointer' }} onClick={() => setExpandedId(expandedId===p.id ? null : p.id)}>
                   <Avatar src={p.profilePicture} name={p.name} size={44} radius={10} />
                   <div style={{ flex:1, minWidth:0 }}>
@@ -76,6 +79,7 @@ export default function AdminPlayers() {
                   <span style={{ color:'#4a5a6a', fontSize:18 }}>{expandedId===p.id ? '▲' : '▼'}</span>
                 </div>
 
+                {/* Expanded */}
                 {expandedId===p.id && (
                   <div className="fade-in" style={{ padding:'0 16px 16px', borderTop:'1px solid rgba(0,0,0,0.06)' }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, margin:'12px 0' }}>
@@ -92,6 +96,7 @@ export default function AdminPlayers() {
                       ))}
                     </div>
 
+                    {/* Receipt — opens inline modal, NOT new tab (data: URLs blocked in browsers) */}
                     {p.paymentReceipt && (
                       <button
                         onClick={() => setReceiptModal(p.paymentReceipt)}
@@ -102,13 +107,23 @@ export default function AdminPlayers() {
                     )}
 
                     <div style={{ marginBottom:10 }}>
-                      <input value={remarksMap[p.id]||''} onChange={e=>setRemarksMap({...remarksMap,[p.id]:e.target.value})} placeholder="Add remarks (optional)" style={{ fontSize:13 }} />
+                      <input
+                        value={remarksMap[p.id]||''}
+                        onChange={e => setRemarksMap({...remarksMap,[p.id]:e.target.value})}
+                        placeholder="Add remarks (optional)"
+                        style={{ fontSize:13 }}
+                      />
                     </div>
 
-                    {p.remarks && <div style={{ background:'rgba(255,149,0,0.1)', borderRadius:8, padding:'8px 10px', marginBottom:10, fontSize:12, color:'#ff9500' }}>Prev remark: {p.remarks}</div>}
+                    {p.remarks && (
+                      <div style={{ background:'rgba(255,149,0,0.1)', borderRadius:8, padding:'8px 10px', marginBottom:10, fontSize:12, color:'#ff9500' }}>
+                        Prev remark: {p.remarks}
+                      </div>
+                    )}
 
                     <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-                      {p.status !== 'approved' && <button onClick={() => action(p.id,'approve','Player approved!')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(0,230,118,0.15)', border:'1px solid rgba(0,230,118,0.3)', color:'#00e676', fontWeight:600, cursor:'pointer', fontSize:13 }}>✅ Approve</button>}
+                      <button onClick={() => { if(window.confirm('Delete this player permanently?')) action(p.id,'delete','Player deleted'); }} style={{ padding:'8px 14px', borderRadius:10, background:'rgba(255,68,68,0.2)', border:'1px solid rgba(255,68,68,0.5)', color:'#ff4444', fontWeight:700, cursor:'pointer', fontSize:13 }}>🗑 Delete</button>
+                      {p.status !== 'approved' && <button onClick={() => action(p.id,'approve','Player approved!')}} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(0,230,118,0.15)', border:'1px solid rgba(0,230,118,0.3)', color:'#00e676', fontWeight:600, cursor:'pointer', fontSize:13 }}>✅ Approve</button>}
                       {p.status !== 'rejected' && <button onClick={() => action(p.id,'reject','Player rejected')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(255,68,68,0.1)', border:'1px solid rgba(255,68,68,0.25)', color:'#ff4444', fontWeight:600, cursor:'pointer', fontSize:13 }}>❌ Reject</button>}
                       {p.status !== 'banned'   && <button onClick={() => action(p.id,'ban','Player banned')} style={{ padding:'8px 16px', borderRadius:10, background:'rgba(255,68,68,0.15)', border:'1px solid rgba(255,68,68,0.4)', color:'#ff4444', fontWeight:700, cursor:'pointer', fontSize:13 }}>🚫 Ban</button>}
                     </div>
@@ -120,15 +135,28 @@ export default function AdminPlayers() {
         )}
       </AdminLayout>
 
+      {/* Receipt Image Modal — inline viewer, no new tab */}
       {receiptModal && (
-        <div onClick={() => setReceiptModal(null)} style={{ position:'fixed', inset:0, zIndex:2000, background:'rgba(0,0,0,0.93)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:20 }}>
+        <div
+          onClick={() => setReceiptModal(null)}
+          style={{ position:'fixed', inset:0, zIndex:2000, background:'rgba(0,0,0,0.93)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:20 }}
+        >
           <div style={{ position:'relative', maxWidth:'92vw', maxHeight:'86vh' }}>
-            <img src={receiptSrc(receiptModal)} alt="Payment Receipt" style={{ maxWidth:'100%', maxHeight:'80vh', borderRadius:12, boxShadow:'0 8px 40px rgba(0,0,0,0.6)', display:'block', objectFit:'contain' }} onClick={e => e.stopPropagation()} onError={e => { e.target.style.display='none'; }} />
-            <button onClick={() => setReceiptModal(null)} style={{ position:'absolute', top:-14, right:-14, width:32, height:32, borderRadius:'50%', background:'#ff4444', border:'2px solid #fff', color:'#fff', fontSize:14, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}>✕</button>
+            <img
+              src={receiptSrc(receiptModal)}
+              alt="Payment Receipt"
+              style={{ maxWidth:'100%', maxHeight:'80vh', borderRadius:12, boxShadow:'0 8px 40px rgba(0,0,0,0.6)', display:'block', objectFit:'contain' }}
+              onClick={e => e.stopPropagation()}
+              onError={e => { e.target.style.display='none'; }}
+            />
+            <button
+              onClick={() => setReceiptModal(null)}
+              style={{ position:'absolute', top:-14, right:-14, width:32, height:32, borderRadius:'50%', background:'#ff4444', border:'2px solid #fff', color:'#fff', fontSize:14, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}
+            >✕</button>
           </div>
           <p style={{ color:'rgba(255,255,255,0.45)', fontSize:12, marginTop:14 }}>Tap outside to close</p>
         </div>
       )}
     </>
   );
-                                                              }
+}

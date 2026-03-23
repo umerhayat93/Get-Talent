@@ -5,6 +5,7 @@ import { useAuthStore } from './store/authStore';
 import api from './utils/api';
 
 import LandingPage            from './pages/LandingPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage              from './pages/LoginPage';
 import RegisterPlayerPage     from './pages/RegisterPlayerPage';
 import RegisterCaptainPage    from './pages/RegisterCaptainPage';
@@ -105,6 +106,7 @@ export default function App() {
       <Routes>
         {/* ── Public ──────────────────────────────────────────────────── */}
         <Route path="/"                      element={<AppLayout><LandingPage /></AppLayout>} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/login"                 element={<LoginPage />} />
         <Route path="/register/player"       element={<RegisterPlayerPage />} />
         <Route path="/register/captain"      element={<RegisterCaptainPage />} />

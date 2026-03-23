@@ -189,12 +189,13 @@ export default function FeedPage() {
       const params = new URLSearchParams({ page: String(pageNum), limit: '20' });
       if (sk  !== 'All') params.append('skill', sk);
       if (cat !== 'All') params.append('category', cat);
+      // Pass status filter to backend for correct pagination
+      const statusFilter = STATUS_MAP[t];
+      if (statusFilter) params.append('status', statusFilter);
       const { data } = await api.get(`/players/feed?${params}`);
       if (!data || !Array.isArray(data.players)) { if (!append) setPlayers([]); return; }
-      const statusFilter = STATUS_MAP[t];
-      const filtered = statusFilter ? data.players.filter(p => (p.status||'').toLowerCase() === statusFilter) : data.players;
-      if (append) setPlayers(prev => [...prev, ...filtered]);
-      else setPlayers(filtered);
+      if (append) setPlayers(prev => [...prev, ...data.players]);
+      else setPlayers(data.players);
       setPage(pageNum);
       setHasMore(pageNum < (data.pages||1));
     } catch (err) {
