@@ -95,8 +95,8 @@ export default function LandingPage() {
             {[
               { path: '/register/player',    label: 'Player',    sub: 'Join auctions',      accent: '#FFFFFF' },
               { path: '/register/captain',   label: 'Captain',   sub: 'Build your team',    accent: '#FFFFFF' },
-              { path: '/register/fan',       label: 'Fan',       sub: 'Watch for free',     accent: '##FFFFFF' },
-              { path: '/register/organiser', label: 'Organiser', sub: 'Run tournaments',    accent: '##FFFFFF' },
+              { path: '/register/fan',       label: 'Fan',       sub: 'Watch for free',     accent: '#FFFFFF' },
+              { path: '/register/organiser', label: 'Organiser', sub: 'Run tournaments',    accent: '#FFFFFF' },
             ].map(({ path, label, sub, accent }) => (
               <button key={path} onClick={() => navigate(path)}
                 style={{
