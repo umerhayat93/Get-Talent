@@ -175,8 +175,10 @@ export default function MyProfilePage() {
     try {
       const { data: result } = await api.post('/players/re-auction');
       toast.success(result.message);
-      setShowReAuctionFee(true);
       await loadProfile();
+      // Show payment modal immediately after re-auction request
+      setShowReAuctionFee(true);
+      setShowPayment(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed');
     } finally {
@@ -248,9 +250,10 @@ export default function MyProfilePage() {
 
   // Payment notice: only show if PENDING status AND paymentStatus is not yet verified
   // NEVER show for approved players — they are verified
+  // Show payment notice for pending (initial reg) AND re-auction-pending
   const showPaymentNotice = isPlayer && !isApproved &&
     player?.paymentStatus !== 'verified' &&
-    player?.paymentStatus !== 're-auction-pending';
+    (player?.paymentStatus === 'pending' || player?.paymentStatus === 'submitted' || player?.paymentStatus === 're-auction-pending');
 
   const isReAuctionPending = player?.paymentStatus === 're-auction-pending';
 
@@ -377,7 +380,7 @@ export default function MyProfilePage() {
             <span style={{ fontWeight: 800, fontSize: 16, color: '#1877f2' }}>Rs. {reAuctionFee.toLocaleString()}</span>
           </div>
           {isReAuctionPending ? (
-            <button onClick={() => setShowPayment(true)} style={{ width: '100%', padding: '12px', borderRadius: 12, background: 'linear-gradient(135deg,#f5c842,#e6a800)', border: 'none', color: '#ffffff', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>
+            <button onClick={() => { setShowReAuctionFee(true); setShowPayment(true); }} style={{ width: '100%', padding: '12px', borderRadius: 12, background: 'linear-gradient(135deg,#f5c842,#e6a800)', border: 'none', color: '#ffffff', fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>
               Pay Re-registration Fee — Rs. {reAuctionFee.toLocaleString()}
             </button>
           ) : (

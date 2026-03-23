@@ -118,6 +118,15 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div style={{ textAlign: 'right', marginTop: 12, marginBottom: 4 }}>
+          <span
+            onClick={() => navigate('/forgot-password')}
+            style={{ fontSize: 13, color: '#1877f2', cursor: 'pointer', fontWeight: 600 }}
+          >
+            Forgot Password?
+          </span>
+        </div>
+
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 16px' }}>
           <div style={{ flex: 1, height: 1, background: '#e4e6ea' }} />

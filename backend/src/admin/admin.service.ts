@@ -401,9 +401,16 @@ export class AdminService {
   async deletePlayer(id: string) {
     const p = await this.playerRepo.findOne({ where: { id }, relations: ['user'] });
     if (!p) throw new NotFoundException();
-    // Delete user account too
-    if (p.user?.id) await this.userRepo.delete(p.user.id);
+    // Delete related bids first (FK constraint)
+    await this.bidRepo.delete({ player: { id } });
+    // Delete related bidding sessions
+    await this.sessionRepo.delete({ player: { id } });
+    // Clear player's tournament reference
+    await this.playerRepo.update(id, { tournament: null } as any);
+    // Delete player record
     await this.playerRepo.delete(id);
+    // Delete user account
+    if (p.user?.id) await this.userRepo.delete(p.user.id);
     return { message: 'Player deleted' };
   }
 
@@ -422,14 +429,28 @@ export class AdminService {
   async deleteCaptain(id: string) {
     const c = await this.captainRepo.findOne({ where: { id }, relations: ['user'] });
     if (!c) throw new NotFoundException();
-    if (c.user?.id) await this.userRepo.delete(c.user.id);
+    // Delete related bids first
+    await this.bidRepo.delete({ captain: { id } });
+    // Delete captain record
     await this.captainRepo.delete(id);
+    // Delete user account
+    if (c.user?.id) await this.userRepo.delete(c.user.id);
     return { message: 'Captain deleted' };
   }
 
   async deleteTournament(id: string) {
     const t = await this.tournamentRepo.findOne({ where: { id } });
     if (!t) throw new NotFoundException();
+    // Clear player tournament references first
+    await this.playerRepo
+      .createQueryBuilder()
+      .update()
+      .set({ tournament: null } as any)
+      .where('tournamentId = :id', { id })
+      .execute();
+    // Delete bidding sessions for this tournament
+    await this.sessionRepo.delete({ tournament: { id } });
+    // Delete tournament
     await this.tournamentRepo.delete(id);
     return { message: 'Tournament deleted' };
   }
