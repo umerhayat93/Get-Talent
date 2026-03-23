@@ -128,10 +128,10 @@ export default function LoginPage() {
         {/* Register options — clean text only, no icons */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {[
-            { label: 'Player',    path: '/register/player',    color: '#1877f2' },
-            { label: 'Captain',   path: '/register/captain',   color: '#1877f2' },
-            { label: 'Fan',       path: '/register/fan',       color: '#1877f2' },
-            { label: 'Organiser', path: '/register/organiser', color: '#1877f2' },
+            { label: 'Player',    path: '/register/player',    color: '#FFFFFF' },
+            { label: 'Captain',   path: '/register/captain',   color: '#FFFFFF' },
+            { label: 'Fan',       path: '/register/fan',       color: '#FFFFFF' },
+            { label: 'Organiser', path: '/register/organiser', color: '#FFFFFF' },
           ].map(({ label, path, color }) => (
             <button key={path} onClick={() => navigate(path)}
               style={{
