@@ -61,9 +61,9 @@ export default function PaymentModal({ type = 'player', fee, onClose, onSuccess 
           <div style={{ fontSize: 12, color: '#6a7080', marginBottom: 8, fontWeight: 600, letterSpacing: '0.5px' }}>PAYMENT DETAILS</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {[
-              ['Bank', 'HBL / EasyPaisa'],
-              ['Account', '0314-1234567'],
-              ['Account Name', 'Get Talent Pvt Ltd'],
+              ['Bank', 'SADAPAY'],
+              ['Account', 'PK79SADA0000003288649256'],
+              ['Account Name', 'SAEED ANWAR'],
               ['Amount', `Rs. ${(fee || 0).toLocaleString()}`],
             ].map(([label, val]) => (
               <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
