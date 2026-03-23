@@ -18,7 +18,7 @@ export default function LandingPage() {
 
   const glass = {
     background: 'rgba(255,255,255,0.14)',
-    backdropFilter: 'blur(20px)',',
+    backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.18)',
     borderRadius: 18,
