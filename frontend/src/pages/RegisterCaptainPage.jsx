@@ -79,7 +79,7 @@ export default function RegisterCaptainPage() {
   const fields = [
     { key: 'name',     label: 'Full Name',       type: 'text',     ph: 'Your full name'        },
     { key: 'phone',    label: 'Phone (Login ID)', type: 'tel',      ph: '03xxxxxxxxx'           },
-    { key: 'teamName', label: 'Team Name',        type: 'text',     ph: 'e.g. Peshawar Zalmi   },
+    { key: 'teamName', label: 'Team Name',        type: 'text',     ph: 'e.g. Peshawar Zalmi'  },
     { key: 'password', label: 'Password (min 6)', type: 'password', ph: 'Choose a password'    },
     { key: 'confirm',  label: 'Confirm Password', type: 'password', ph: 'Repeat password'      },
   ];
