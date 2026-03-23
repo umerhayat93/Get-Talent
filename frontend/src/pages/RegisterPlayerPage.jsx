@@ -122,7 +122,7 @@ export default function RegisterPlayerPage() {
 
           {/* Gmail */}
           <div style={{ marginBottom: 14 }}>
-            <label style={lbl}>Gmail Address (for password reset)</label>
+            <label style={lbl}>Gmail Address </label>
             <input type="email" value={form.email} onChange={e => setField('email', e.target.value)} placeholder="yourname@gmail.com" style={inp} onFocus={e => e.target.style.borderColor = '#1877f2'} onBlur={e => e.target.style.borderColor = '#e4e6ea'} />
             <p style={{ fontSize:11, color:'#8a8d91', marginTop:3 }}>Optional — only used if you forget your password</p>
           </div>
